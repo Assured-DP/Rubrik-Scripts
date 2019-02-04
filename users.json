@@ -1,0 +1,23 @@
+{
+	"users": [
+	{
+		"username": "userone",
+		"emailAddress": "userone@location.com",
+		"password": "Fak3P@ssw0rd"
+	},
+	{
+        "username": "usertwo",
+        "emailAddress": "userotwo@location.com",
+        "password": "Fak3P@ssw0rd"
+	},
+	{
+        "username": "userthree",
+        "emailAddress": "userthree@location.com",
+        "password": "Fak3P@ssw0rd"
+	},
+	{
+        "username": "userfour",
+        "emailAddress": "userfoure@location.com",
+        "password": "Fak3P@ssw0rd"
+	}]
+}
