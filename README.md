@@ -21,3 +21,10 @@ Summary: | Recovers a file or a folder from a vmware virtual machine and restore
 Requires: | requests
 Notes: | Assumes that the target path is mounted locally to the system running the script. Will not connect to remote UNC or NFS paths on demand.
 
+
+setup_users.py | Setup identical users across many Rubrik clusters
+------- | -------
+Filename(s): | setup_users.py, targetlist.json, users.json
+Summary: | Allows the user to enter a list of users via the keyboard or load a JSON list of users (users.json example). Once the users are loaded, the script then pulls a list of available target clusters by leveraging targetlist.json with clusters and b64encoded passwords for the admin account. Currently the script is hardcoded to use admin account and hardcoded to require the b64encoded password lives in the targetlist.
+Requires: | requests
+Notes: | requires the targetlist.json is in the same folder and preconfigured. Allows operator to enter the location of the users.json path as an absolute link. Script has been tested in Python 2.7. would need modifications for 3.x
