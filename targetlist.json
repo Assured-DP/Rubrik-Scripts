@@ -1,0 +1,14 @@
+{
+	"customers" : [
+		{
+			"CustomerNumber": "12345",
+			"CustomerName": "Customer one",
+			"clusters": [
+				{
+					"uuid": "e736fa7e-aaaa-1234-aa12-123456789101",
+					"hostname": "10.10.10.10",
+					"replicationOnly": false,
+					"password": "Base64Encoded"
+				} ]
+		}
+}		
