@@ -28,3 +28,11 @@ Filename(s): | setup_users.py, targetlist.json, users.json
 Summary: | Allows the user to enter a list of users via the keyboard or load a JSON list of users (users.json example). Once the users are loaded, the script then pulls a list of available target clusters by leveraging targetlist.json with clusters and b64encoded passwords for the admin account. Currently the script is hardcoded to use admin account and hardcoded to require the b64encoded password lives in the targetlist.
 Requires: | requests
 Notes: | requires the targetlist.json is in the same folder and preconfigured. Allows operator to enter the location of the users.json path as an absolute link. Script has been tested in Python 2.7. would need modifications for 3.x
+
+
+getnetworks... | Gets all VMs with their network adapters and MAC addresses from a Nutanix cluster
+------- | -------
+Filename(s): | getnetworks.py (Linux Python 2.7), getnetworks.win.py (Windows python 3.6), getnetworks.win27.py (windows Python 2.7)
+Summary: | Creates a JSON file that has all the VMs in a nutanix cluster, along with their associated NIC, MAC, and Network name
+Requires: | requests
+Notes: | Assumes Prism is on the default ports, would need modification for different ports.
