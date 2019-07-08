@@ -9,8 +9,8 @@ orannfstab.py | Create oranfstab and mtab
 ------ | -----
 Filename: | create_oranfstab.py
 Summary: | Generates the oranfstab and mtab files for oracle systems that are leveraging oranfs and RMAN writing to managed volumes
-Requires: | requests
-Notes: | Assumes a single source IP address from each node in the RAC cluster. This IP address is specified in the "local ip" variable. There would be a scenario where a customer has many IPs on a single node of a RAC cluster they want to load balance over. This would require modification of the script to list all source IPs as associated with the target paths.
+Requires: | requests, urllib3, time
+Notes: | Allows for comma-separated list or oracle node source IPs. Each rubrik node is considered an NFS server and the floating IP is the path. Script will consolidate managed volume exports to a single rubrik node entry in the script.
 
 
 
