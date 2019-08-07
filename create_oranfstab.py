@@ -11,13 +11,25 @@ global billingSize
 rubrikip = raw_input("Rubrik IP: ")
 rubrikuser = raw_input("Rubrik user: ")
 rubrikpass = getpass.getpass("Rubrik Pass: ")
-localip = raw_input("Enter IP of Oracle Host (Separate Multiple with commas): ")
-
-oracleip = []
-if "," in localip:
-	oracleip = localip.split(",")
+orahosts = []
+hostlist = []
+comhosts = raw_input("Enter Oracle Hosts to configure (Separate multiple with commas): ")
+if "," in comhosts:
+	orahosts = comhosts.split(",")
 else:
-	oracleip.append(localip)
+	orahosts.append(comhosts)
+count = 0
+for host in orahosts:
+	localip = raw_input("Enter IP of Oracle Host "+host+" (Separate Multiple with commas): ")
+	oracleip = []
+	if "," in localip:
+		oracleip = localip.split(",")
+	else:
+		oracleip.append(localip)
+	oradict = {}
+	oradict['host'] = host
+	oradict['ips'] = oracleip
+	hostlist.append(oradict)
 
 tokenUrl = "https://"+rubrikip+"/api/v1/session"
 username = rubrikuser
@@ -44,20 +56,24 @@ def buildVolumeList():
 	global voljson
 	voljson = volsresponse.json()
 	count = 1
-	if voljson['total'] > 0:
-		for node in floatipjson['data']:
-			print ("server: "+node['nodeId'])
-			for oraip in oracleip:
-				print("local: "+oraip+" path: "+node['ip'])
-			mntcount = 0
-			for volume in voljson['data']:
-				for channel in volume['mainExport']['channels']:
-					if channel['ipAddress'] == node['ip']:
-						mntname = volume['name']+"-ch"+str(mntcount)
-						mntcount = mntcount+1
-						print("export: "+channel['mountPoint']+" mount: /mnt/rubrik/"+mntname)
-			print("nfs_version: nfsv3")
-			print("")
+	for host in hostlist:
+		count = 1
+		oracleip = host['ips']
+		print ("*** HOST: "+host['host']+" *****")
+		if voljson['total'] > 0:
+			for node in floatipjson['data']:
+				print ("server: "+node['nodeId'])
+				for oraip in oracleip:
+					print("local: "+oraip+" path: "+node['ip'])
+				mntcount = 0
+				for volume in voljson['data']:
+					for channel in volume['mainExport']['channels']:
+						if channel['ipAddress'] == node['ip']:
+							mntname = volume['name']+"-ch"+str(mntcount)
+							mntcount = mntcount+1
+							print("export: "+channel['mountPoint']+" mount: /mnt/rubrik/"+mntname)
+				print("nfs_version: nfsv3")
+				print("")
 
 def buildTab():
     #vmurl = "https://uscust008mon001.us.assured.local/api/internal/managed_volume"
