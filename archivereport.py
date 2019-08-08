@@ -17,16 +17,12 @@ import threading
 from dateutil import parser
 from pytz import timezone
 
-# Global Variables
-# drbrikip = "rbkcluster1"
-# basedrurl = "https://"+drbrikip+"/api/"
-# urlclusterid = basedrurl+"v1/cluster/me"
-# urlvmcall = basedrurl+"v1/vmware/vm"
+
 
 # Silence warnings
-# requests.packages.urllib3.disable_warnings()
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+##### From here to the end of recordAnswer is not used, but I left it so we can later re-add an answerfile if so desired 
 def establishAnswers():
 	answerstring = "{ \"rubrikip\": \"\", \"rubrikuser\": \"\", \"vcenter\": \"\", \"vcenteruser\": \"\", \"custnumber\": \"\"}"
 	answerjson = json.load(answerstring)
@@ -57,7 +53,8 @@ def recordAnswer(userinput, answerreference):
 		answerjson[answerreference] = userinput
 		answerjson = manageAnswerFile(answerjson)
 		return userinput
-	
+##### END of the answerfile section
+
 # Function for Opening the Rubrik Session
 def connectRubrik(dripaddress,username,password):
 	#tempsess = requests.Session()
@@ -91,6 +88,7 @@ def getSnapshot(vmid):
 	latestsnap = snapjson['data'][0]['id']
 	return latestsnap
 
+# Function for waiting for Active threads to reduce below maxThreads
 def waitForThreads():
 	slowDown = True
 	while slowDown:
@@ -100,12 +98,13 @@ def waitForThreads():
 		else:
 			slowDown = False		
 	
-# SLA Object Count
+# SLA Object Count -- Calculate total objects connected to an SLA
 def getObjectCount(slaJson):
 	total = slaJson['numDbs']+slaJson['numFileset']+slaJson['numHypervVms']+slaJson['numNutanixVms']+slaJson['numManagedVolumes']+slaJson['numLinuxHosts']+slaJson['numShares']+slaJson['numWindowsHosts']+slaJson['numVms']
 	return total
 
-# Get Newest Archive Snapshot
+# Get Newest Archive Snapshot Reverse sorts a JSON list of all snapshtos by date and iterates from the newest snapshot looking for archived snaps.
+# CloudState identifies if there is an archive. Setting above 0 means an archive sanp exists, even if it has been downloaded or is also local
 def getArchiveSnap(snapjson):
 	sortsnaps = sorted(snapjson, key=lambda x: datetime.datetime.strptime(x['date'], '%Y-%m-%dT%H:%M:%S.%fZ'), reverse=True)
 	for snap in sortsnaps:
@@ -121,6 +120,8 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 	sla = sla_obj['id']
 	snapcount = 0
 	outputjsonstring = ""
+	# Build out URLs for all the different object types.
+	# Volume Groups aren't in this list but tend to get covered by Fileset below. Need to double check this theory
 	if objtyped == "Vms":
 		listurl = "https://"+cluster['nodes'][node]['ip']+"/api/v1/vmware/vm?effective_sla_domain_id="+sla
 		objtype = "VMWare VM"
@@ -153,19 +154,20 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 		try:
 			filesetjson = filesetresponse.json()
 		except:
-			syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 225. Response: "+str(filesetresponse))
+			syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 157. Response: "+str(filesetresponse))
 			tempsess, temptoken = refreshRubrik(cluster['nodes'][node]['ip'])
 			cluster['nodes'][node]['session'] = tempsess
 			filesetresponse = cluster['nodes'][node]['session'].get(url=listurl)
 			filesetjson = filesetresponse.json()
 		snapcount = 0
+		# Special Handling for Filesets
 		for fset in filesetjson['data']:
 			fseturl = "https://"+cluster['nodes'][node]['ip']+"/api/"+snappath+fset['id']
 			fsetresponse = cluster['nodes'][node]['session'].get(url=fseturl)
 			try:
 				fsetsnaps = fsetresponse.json()
 			except:
-				syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 237. Response: "+str(fsetresponse))
+				syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 170. Response: "+str(fsetresponse))
 				tempsess, temptoken = refreshRubrik(cluster['nodes'][node]['ip'])
 				cluster['nodes'][node]['session'] = tempsess
 				fsetresponse = cluster['nodes'][node]['session'].get(url=fseturl)
@@ -189,6 +191,7 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 				globaloutput.append(json.loads(outputjsonstring))
 				snapcount = snapcount + 1 
 		return 0
+	# End of FileSet Handling. Moving on to handling of all other object types
 	listresponse = cluster['nodes'][node]['session'].get(url=listurl)
 	syslog.syslog(syslog.LOG_INFO, listurl+" response: "+str(listresponse))
 	#print listurl
@@ -210,14 +213,14 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 			try:
 				snapjson = snapresponse.json()
 			except:
-				syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 213. Reponse: "+str(snapresponse))
+				syslog.syslog(syslog.LOG_ERR, listurl+": failure. Line 216. Reponse: "+str(snapresponse))
 				tempsess, temptoken = refreshRubrik(cluster['nodes'][node]['ip'])
 				cluster['nodes'][node]['session'] = tempsess
 				snapresponse = cluster['nodes'][node]['session'].get(url=listurl)
 				try:
 					snapjson = snapresponse.json()
 				except:
-					syslog.syslog(syslog.LOG_ERR, listurl+": 2nd failure, line 220. Response: "+str(snapresonse))
+					syslog.syslog(syslog.LOG_ERR, listurl+": 2nd failure, line 223. Response: "+str(snapresonse))
 					syslog.syslog(syslog.LOG_ERR, listurl+": response text: "+str(snapresponse.text))
 			objreport = objtype
 			if snapjson['total']>0:
@@ -228,7 +231,7 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 				try:
 					snapdate = snapjson['data'][snapindex]['date']
 				except:
-					syslog.syslog(syslog.LOG_ERR, "JSON Error: "+objid['name']+" line 231: snap: "+str(snapjson['data'][snapindex]))
+					syslog.syslog(syslog.LOG_ERR, "JSON Error: "+objid['name']+" line 234: snap: "+str(snapjson['data'][snapindex]))
 					continue
 				archivesnapdate = getArchiveSnap(snapjson['data'])
 			else:
@@ -251,30 +254,23 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 					try:
 						dbjson = dbresponse.json()
 					except:
-						syslog.syslog(syslog.LOG_ERR, objid['name']+" failed JSON on recoverable_range line 254. Response: "+str(dbresponse))
+						syslog.syslog(syslog.LOG_ERR, objid['name']+" failed JSON on recoverable_range line 257. Response: "+str(dbresponse))
 						syslog.syslog(syslog.LOG_ERR, objid['name']+" response text: "+str(dbresponse.text))
 						continue
 				dbsnapdate = dbjson['data'][dbjson['total']-1]['endTime']
 				if dbsnapdate > snapdate:
 					snapdate = dbsnapdate
-			#today = datetime.datetime.now(timezone('UTC'))
-			#naiveday = etc.localize(today.replace(tzinfo=None))
-			#naivesnap = etc.localize(snapdate.replace(tzinfo=None))
-			#datediff = abs((naiveday-naivesnap))
-			#showtime = "%dD, %dh:%dm" % (datediff.days, datediff.seconds//3600, (datediff.seconds//60)%60)
-			#print "AT Output Line"+objid['name']
 			outputjsonstring = "{ \"cluster\": \""+cluster['name']+"\", \"Obj Name\": \""+objid['name']+"\", \"SLA\": \""+sla_obj['name']+"\", \"Latest Local Snap\": \""+snapjson['data'][snapindex]['date']+"\", \"Latest Archive Date\": \""+archivesnapdate+"\"}"
 			globaloutput.append(json.loads(outputjsonstring))
 			snapcount = snapcount + 1
-			#if sla[-4:] == "5591":
-			#	print "{ \"name\": \""+objid['name']+"\", \"offset\": "+str(datediff.total_seconds())+", \"date\": \""+str(snapdate.date())+"\", \"objectType\" : \""+objtype+"\", \"objLocation\": \""+objreport+"\" }"
-			#print outputjsonstring
 
+# If the Rubrik session goes stale, this will recreate it using the existing user and password
 def refreshRubrik(rubrikip):
 	session, token = connectRubrik(rubrikip,rubrikuser,rubrikpass)
 	syslog.syslog(syslog.LOG_INFO, "Refreshed Session for "+str(rubrikip))
 	return session, token 
 
+# Build out a JSON of the cluster information that includes the version information and the nodes
 def genClusterJson(rubrik,host):
 	clusterdata = {}
 	url = "https://"+host+"/api/v1/cluster/me"
@@ -302,25 +298,29 @@ def genClusterJson(rubrik,host):
 		}
 	return clusterdata
 
+######################## GLOBAL VARIABLES
 etc = timezone('US/Eastern')
-storepath = "./"
-missingcount = 0
-maxThreadCount = 15
-maxSessions = 9
-globaloutput = []
-threadlist = []
+storepath = "./" # CSV TARGET PATH
+missingcount = 0 
+maxThreadCount = 15 # Maximum number of Python Threads
+maxSessions = 9 # Maximum number of Rubrik Sessions. Script will use the greater of the node count or the session count
+globaloutput = [] # Establish the output container
+threadlist = [] # Establish the list of threads
 
+# Collect user inputs to setup authentication
 rubrikip = raw_input("Rubrik IP: ")
 rubrikuser = raw_input("Rubrik user: ")
 rubrikpass = getpass.getpass("Rubrik Pass: ")
 tokenUrl = "https://"+rubrikip+"/api/v1/session"
 username = rubrikuser
 password = rubrikpass
+# Generate initial token
 rubriksession, token = connectRubrik(rubrikip, rubrikuser, rubrikpass)
 bearertoken = 'Bearer ' + token
 
+# Pull cluster data into master JSON
 cluster = genClusterJson(rubriksession,rubrikip)
-#print cluster
+# Establish file name for CSV
 now = datetime.datetime.now()
 timestamp = str(now.strftime("%Y-%m-%d--%H.%M-"))
 print timestamp
