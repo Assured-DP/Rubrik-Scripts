@@ -36,3 +36,11 @@ Filename(s): | getnetworks.py (Linux Python 2.7), getnetworks.win.py (Windows py
 Summary: | Creates a JSON file that has all the VMs in a nutanix cluster, along with their associated NIC, MAC, and Network name
 Requires: | requests
 Notes: | Assumes Prism is on the default ports, would need modification for different ports.
+
+
+archivereport.py | Polls all objects assigned to an SLA and returns the most recent snap date and most recent archive snap date
+------- | -------
+Filename(s): | archivereport.py (2.7 python)
+Summary: | Creates a CSV file formatted as date-time-clustername.csv containing clustername, object name, SLA name, latest snap, and latest archived snap
+Requires: | requests, pytz, json, sys, datetime, syslog, threading
+Notes: | Variable maxSessions can be configured for how many nodes you want to run this against. The scripts will thread the jobs by object type within an SLA. For example, an SLA with VMs and MSSQL will have two threads, one for VMs and one for SQL. You can set maxThreads to limit the number of python threads or expand them. Rubrik has a limitation of 10 sessions so any setting above 10 for maxSessions will have a performance penalty as the script will reauthenticate any dropped sessions due to excessive sessions.
