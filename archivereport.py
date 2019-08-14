@@ -323,7 +323,7 @@ cluster = genClusterJson(rubriksession,rubrikip)
 # Establish file name for CSV
 now = datetime.datetime.now()
 timestamp = str(now.strftime("%Y-%m-%d--%H.%M-"))
-print timestamp
+print (timestamp)
 sourcepath = storepath+timestamp+cluster['name']+".csv"
 
 count = 0
@@ -369,7 +369,7 @@ for sla in slajson['data']:
 		loopslajson = loopresponse.json()
 	except:
 		syslog.syslog(syslog.LOG_ERR, loopslaurl+" failed with response "+str(loopresponse))
-		print(objid['name']+": Bad Snap Data")
+		print(sla['name']+": Bad Snap Data")
 		tempsess, temptoken = refreshRubrik(cluster['nodes'][nodecount]['ip'])
 		cluster['nodes'][nodecount]['session'] = tempsess
 		loopresponse = cluster['nodes'][nodecount]['session'].get(url=loopslaurl)
@@ -434,7 +434,7 @@ while threadsrunning:
 		threadsrunning = False
 print ("Script completed")
 #print json.dumps(globaloutput)
-print "Writing "+sourcepath
+print ("Writing "+sourcepath)
 with open(sourcepath, 'w') as outfile:
 	tablehead = "Cluster, Obj Name, SLA, Latest Local Snap, Latest Archive Date"
 	outfile.write(tablehead+'\n')
