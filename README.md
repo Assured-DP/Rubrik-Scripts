@@ -44,3 +44,11 @@ Filename(s): | archivereport.py (2.7 python)
 Summary: | Creates a CSV file formatted as date-time-clustername.csv containing clustername, object name, SLA name, latest snap, and latest archived snap
 Requires: | requests, pytz, json, sys, datetime, syslog, threading
 Notes: | Variable maxSessions can be configured for how many nodes you want to run this against. The scripts will thread the jobs by object type within an SLA. For example, an SLA with VMs and MSSQL will have two threads, one for VMs and one for SQL. You can set maxThreads to limit the number of python threads or expand them. Rubrik has a limitation of 10 sessions so any setting above 10 for maxSessions will have a performance penalty as the script will reauthenticate any dropped sessions due to excessive sessions.
+
+
+OnDemandBackup.ps1 | Runs a single OnDemand backup for a hard-coded object against a specific SLA
+------- | -------
+Filename(s): | OnDemandBackup.ps1 (Powershell 5.1, Rubrik-Module)
+Summary: | Creates an OnDemand Backup for a single object. 
+Requires: | Powershell 5.1, Rubrik-Module
+Notes: | Need to create a creds file, instructions in the code body. All variables are hard-coded instead of passed as parameters as the intent is each script would be for a specific object. Code is pre-configured to support 4 different object types (vmware/vm, mssql, filesets, and hyperv/vm). Code describes where to set the variables and requires host informatioin for filset or SQL backups.
