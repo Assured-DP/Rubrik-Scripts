@@ -187,7 +187,7 @@ def getSLAArchives(sla_obj,objtyped,clusuuid,node):
 				showtime = "%dD, %dh:%dm" % (datediff.days, datediff.seconds//3600, (datediff.seconds//60)%60)
 				if snapcount > 0:
 					outputjsonstring = outputjsonstring + ", "
-				outputjsonstring = "{ \"cluster\": \""+cluster['name']+"\", \"Obj Name\": \""+fset['name']+"\", \"SLA\": \""+sla_obj['name']+"\", \"Latest Local Snap\": \""+fsetsnaps['snapshots'][snapindex]['date']+"\", \"Latest Archive Date\" : \""+archivesnapdate+"\"}"
+				outputjsonstring = "{ \"cluster\": \""+cluster['name']+"\", \"Obj Name\": \""+fset['hostName']+" "+fset['name']+"\", \"SLA\": \""+sla_obj['name']+"\", \"Latest Local Snap\": \""+fsetsnaps['snapshots'][snapindex]['date']+"\", \"Latest Archive Date\" : \""+archivesnapdate+"\"}"
 				globaloutput.append(json.loads(outputjsonstring))
 				snapcount = snapcount + 1 
 		return 0
