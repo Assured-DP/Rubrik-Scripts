@@ -19,7 +19,7 @@ from dateutil import parser
 
 
 # Declaring all Global variables
-billingpath = "targetlist.json"
+billingpath = "/home/adpengineer/Downloads/uscust000/billingcustomers.json"
 
 # Disabling Certificate Warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
