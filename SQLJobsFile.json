@@ -1,0 +1,36 @@
+{
+    "RubrikCluster":  {
+                          "Server":  "10.51.23.240",
+                          "Token":  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZTFjMjllNC04OTQ1LTQzYjAtYTE0OC1iNzdmZTk0NzBiYzYiLCJpc3MiOiI1ZmViZmEzMi05NmY0LTRlNzItYjM1OC05NjkzMTg3NDAzMTMiLCJqdGkiOiI4MTc4NWM0Mi0zN2EwLTRjMDctOWZkMy0zN2IzMTQzOGU5OTkifQ.2jfMSogCA4kHtRPO6OTS2hyz1gzRCF913f84tbRdsy8"
+                      },
+    "Databases":  [
+                      {
+                          "Source":  {
+                                         "DatabaseName":  "TestDataNew002",
+                                         "Databaseid":  "MssqlDatabase:::95b0e57c-8b68-4284-9055-55e3191d5a3e",
+                                         "ServerInstance":  "se-sql.cust02.local\\MSSQLSERVER",
+                                         "AvailabilityGroupName":  "",
+                                         "instanceId":  "MssqlInstance:::38863d67-4a6d-4604-b64e-6d5e05c62e87"
+                                     },
+                          "Target":  {
+                                         "DatabaseName":  "RecoverTestDataAE",
+                                         "ServerInstance":  "se-sql.cust02.local\\MSSQLSERVER",
+                                         "instanceId":  "MssqlInstance:::38863d67-4a6d-4604-b64e-6d5e05c62e87",
+                                         "RecoveryPoint":  "latest",
+                                         "Files":  [
+                                                       {
+                                                           "logicalName":  "RecoverTestDataAE",
+                                                           "exportPath":  "C:\\temp\\DATA\\",
+                                                           "newFilename":  "RecoverTestDataAE.mdf"
+                                                       },
+                                                       {
+                                                           "logicalName":  "RecoverTestDataAE_Log",
+                                                           "exportPath":  "C:\\temp\\LOG\\",
+                                                           "newFilename":  "RecoverTestDataAE.ldf"
+                                                       }
+                                                   ],
+                                         "FinishRecovery":  true
+                                     }
+                      }
+                  ]
+}

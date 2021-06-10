@@ -1,0 +1,9 @@
+{
+    "rubrikuser" : "US\\aeva",
+    "rubrikpassword" : "A55ur3d01!",
+    "rubrikhost" : "10.51.25.13",
+    "matchstring" : ".*Test.*",
+    "retentionsla" : "LocalDecom",
+	"noop": true,
+	"verbose": true
+}
