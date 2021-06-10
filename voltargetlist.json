@@ -1,0 +1,19 @@
+{
+    "objects" : [
+		{
+			"type": "volumes",
+			"objname": "usdc01adpjmp001",
+			"objid": "VolumeGroup:::b3fdf713-885d-4430-8e3e-f23fca413953",
+			"slaid": "05840c56-1483-4dea-83b1-6474cf15f60e",
+			"slaname": "USDC01 Production",
+			"volgroups": [ {
+				"group": [ "c","d" ],
+				"postwait": 0
+				},
+				{
+				"group": [ "e","f" ],
+				"postwait": 0
+				}
+				]
+		}]
+}

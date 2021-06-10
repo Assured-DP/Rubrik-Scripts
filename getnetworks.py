@@ -9,8 +9,8 @@ import urllib3
 import sys
 import os
 import getpass
-import time
-import datetime
+# import time
+# import datetime
 
 from requests.auth import HTTPBasicAuth
 from dateutil import parser
@@ -27,11 +27,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def establishAnswers():
 	answerstring = "{ \"nutanixhostname\": \"\", \"nutanixuser\": \"\", \"vcenter\": \"\", \"vcenteruser\": \"\", \"custnumber\": \"\"}"
-	answerjson = json.load(answerstring)
+	answerjson = json.loads(answerstring)
 	return answerjson
 
 def manageAnswerFile(answerfile):
-	answerpath = '/home/adpengineer/nutanix/.answerfile.json'
+	answerpath = './.answerfile.json'
 	if os.path.exists(answerpath):
 		loadedanswers = json.load(open(answerpath))
 		if loadedanswers == answerfile:
@@ -72,9 +72,9 @@ def getClusterInformation(self):
     #This sets up 'pretty print' for the object.
     pp = pprint.PrettyPrinter(indent=2)
     clusterURL = self.base_url + "/cluster"
-    print "Getting cluster information for cluster %s" % self.serverIpAddress
+    print("Getting cluster information for cluster %s" % self.serverIpAddress)
     serverResponse = self.session.get(clusterURL)
-    print "Response code: %s" % serverResponse.status_code
+    print("Response code: %s" % serverResponse.status_code)
     return serverResponse.status_code, json.loads(serverResponse.text)		
 		
 
@@ -126,7 +126,7 @@ def buildVMNetworkJson(nutnetjson,nutanixsess):
 	netjsonstring = "{ \"vmlist\": [ "
 	vmloop = 0
 	for vm in vmlistjson['entities']:
-		netjsonstring = netjsonstring + "{ \"vmname\": \""+vm['name']+"\" ["
+		netjsonstring = netjsonstring + "{ \"vmname\": \""+vm['name']+"\", \"nics\": ["
 		networkurl = basenuturl+"v2.0/vms/"+vm['uuid']+"/nics"
 		niclistresponse = nutanixsess.get(url=networkurl)
 		niclistjson = niclistresponse.json()
@@ -143,24 +143,24 @@ def buildVMNetworkJson(nutnetjson,nutanixsess):
 		if vmloop < total:
 			netjsonstring = netjsonstring+"]}, "
 		else:
-			netjsonstring = netjsonstring+"]}"
+			netjsonstring = netjsonstring+"]}]"
 	netjsonstring = netjsonstring+"}"
-	print netjsonstring
+	#print netjsonstring
 	completejson = json.loads(netjsonstring)
 	return completejson
 
 def convertandwrite(bkjson,name):
 	filepath = name + "_backup.json"
-	print "Creating " + filepath
+	print("Creating " + filepath)
 	with open(filepath, 'w') as dmpfile:
-		json.dump(bkjson, dmpfile)
+                dmpfile.write(json.dumps(bkjson, indent=4))
 	
 # Main Body of Code Starts Here
 passone = "one"
 passtwo = "two"
 
 # Setup Answer File
-answerpath = '/home/adpengineer/nutanix/.answerfile.json'
+answerpath = './.answerfile.json'
 answerjson = { "nutanixhostname": "a", "nutanixuser": "b", "vcenter": "c", "vcenteruser": "d", "custnumber": "e"}
 if os.path.exists(answerpath):
 	answerjson = json.load(open(answerpath))
@@ -170,22 +170,22 @@ else:
 
 # Collect User Information
 os.system('clear')
-nutanixip = raw_input("Enter Nutanix Cluster IP or Hostname [{0}]: ".format(answerjson['nutanixhostname']))
+nutanixip = input("Enter Nutanix Cluster IP or Hostname [{0}]: ".format(answerjson['nutanixhostname']))
 nutanixip = recordAnswer(nutanixip, "nutanixhostname")
-drusername = raw_input("Enter Nutanix username [{0}]: ".format(answerjson['nutanixuser']))
+drusername = input("Enter Nutanix username [{0}]: ".format(answerjson['nutanixuser']))
 drusername = recordAnswer(drusername, "nutanixuser")
 while passone != passtwo:
 	passone = getpass.getpass('Enter Password: ')
 	passtwo = getpass.getpass('Re-Enter Password: ')
 	if passone != passtwo:
-		print "Passwords do not match"
+		print("Passwords do not match")
 nutanixpassword = passone
 passone = "blank"
 passtwo = "blank"
 basenuturl = "https://"+nutanixip+":9440/api/nutanix/"
 
 # Create Nutanix Session
-print "Connecting to Nutanix at "+basenuturl
+print("Connecting to Nutanix at "+basenuturl)
 nutanixsess = connectNutanix(nutanixip, drusername, nutanixpassword)
 clusterurl = basenuturl+"v2.0/cluster"
 clusresponse = nutanixsess.get(url=clusterurl)
