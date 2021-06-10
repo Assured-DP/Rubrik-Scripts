@@ -52,3 +52,11 @@ Filename(s): | OnDemandBackup.ps1 (Powershell 5.1, Rubrik-Module)
 Summary: | Creates an OnDemand Backup for a single object. 
 Requires: | Powershell 5.1, Rubrik-Module
 Notes: | Need to create a creds file, instructions in the code body. All variables are hard-coded instead of passed as parameters as the intent is each script would be for a specific object. Code is pre-configured to support 4 different object types (vmware/vm, mssql, filesets, and hyperv/vm). Code describes where to set the variables and requires host informatioin for filset or SQL backups.
+
+
+gethypervnetworks.ps1 | Pulls All network information for VMs for SCVMM or Hyper-V Hosts connected to a Rubrik
+------- | -------
+Filename(s): | gethypervnetworks.ps1 (Powershell 5.1, Rubrik-Module)
+Summary: | Pulls all network information from a Rubrik for Hyper-V and SCVMM hosts
+Requires: | Powershell 5.1, Rubrik-Module
+Notes: | Code needs to have the Rubrik target updated as the rubrikhost variable. Script will prompt for those credentials. The Active windows user will be used to connect to Hyper V and or SCVMM and will require rights. If SCVMM then it is required to have the console installed locally to get the powershell modules, otherwise the script will fail.
