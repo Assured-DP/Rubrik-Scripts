@@ -382,8 +382,8 @@ def displaySelectedSnaps(uuid):
         }
     for relic in relicdatabase['unmanagedObjects']:
         templated['id'] = relic['id']
+        selectlist = []
         if "primary_cluster_id" in relic:
-            selectlist = []
             if uuid in relic['primary_cluster_id']:
                 for snap in relic['snapshots']['data']:
                     try:
