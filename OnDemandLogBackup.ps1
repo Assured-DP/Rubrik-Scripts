@@ -22,4 +22,4 @@ do {
     start-sleep -seconds 5
     $job_status = Get-RubrikRequest -id $LOGJOB.id -type mssql
     write-host $job_status
-} until($job_status.status -eq "SUCCEEDED") 
+} until($job_status.status -eq "SUCCEEDED")
