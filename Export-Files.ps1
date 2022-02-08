@@ -8,11 +8,11 @@
  
 #>
 param(
-    $srcHost = "10.240.43.53",
+    $srcHost = "10.240.43.51",
     $srcFileset = "SQL Daily 6pm",
-    $srcPath = "G:\\MSSQL\\Daily\\6pm",
-    $dstPath = "G:\\Backups for DB Restore",
-    $dstHost = "192.168.110.53",
+    $srcPath = "G:\MSSQL\Daily\6pm",
+    $dstPath = "G:\Backups for DB Restore\",
+    $dstHost = "192.168.110.51",
     $rubrik = "uscust048mon001"
 )
 Import-Module Rubrik -Force
