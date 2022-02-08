@@ -11,7 +11,7 @@ param(
     $srcHost = "10.240.43.53",
     $srcFileset = "SQL Daily 6pm",
     $srcPath = "G:\\MSSQL\\Daily\\6pm",
-    $dstPath = "G:\\Backups for DB Restore\\G:\\MSSQL\\Daily",
+    $dstPath = "G:\\Backups for DB Restore",
     $dstHost = "192.168.110.53",
     $rubrik = "uscust048mon001"
 )
