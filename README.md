@@ -68,3 +68,11 @@ Filename(s): | relicmanagement.py
 Summary: | Tool for managing replicated and local relics more efficiently than the UI
 Requires: | python3.6, requests, urllib3, time
 Notes: | Code connects to the target Rubrik and will inventory all known connected replication clusters and unmanaged snapshots. Script will import all unmanaged snaps in 50 object increments. Once completed, the user can select which source clusters to deep index for unmanaged snaps. Indexing runs in the background. Once complete you can drill down though each cluster and the objects in that cluster to select snaps. The tool allows to specify which snaps for which objects and then perform a mass delete or SLA reassign across them.
+
+
+Export-Files.ps1 | Exports Source to Destination from one Filset to another
+------- | -------
+Filename(s): | Export-Files.ps1
+Summary: | Exports File or a Folder from a fileset to another host of the same type
+Requires: | powershell 7.x and Rurik SDK for Powershell
+Notes: | The required parameters are listed in the beginning of the file. Any parameter not specified will pull the default parameter
