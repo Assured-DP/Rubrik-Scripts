@@ -124,10 +124,13 @@ def selectSource():
     displayfilter = ""
     while keeplooping:
         displayReplication(displayfilter)
-        choice = input("Select a source to index, (F) to filter, or (X) to finish: ")
+        choice = input("Select a source to index, (F) to filter, (C) for custom entry, or (X) to finish: ")
         if choice.lower() == "f":
             print("")
             displayfilter = input("Enter Filter by Text: ")
+            continue
+        if choice.lower() == "c":
+            addCluster()
             continue
         if choice.lower() == "x":
             keeplooping = False
@@ -150,7 +153,7 @@ def checkObjectPrimary(obj, clusuuid):
     elif obj['objectType'] == "MssqlDatabase":
         url = baseurl+"v1/mssql/db/"+obj['id']
     elif obj['objectType'] == "VolumeGroup":
-        url = baseurl+"internal/volume_group/"+obj['id']
+        url = baseurl+"v1/volume_group/"+obj['id']
     elif obj['objectType'] == "OracleDatabase":
         url = baseurl+"internal/oracle/db/"+obj['id']
     elif "Fileset" in obj['objectType']:
@@ -160,7 +163,13 @@ def checkObjectPrimary(obj, clusuuid):
     else:
         syslog.syslog(syslog.LOG_ERR, "Unknown ObjectType: "+obj['objectType'])
     response = rubrik.get(url=url)
-    dataset = response.json()
+    try:
+        dataset = response.json()
+    except:
+        print(response.status_code)
+        syslog.syslog(syslog.LOG_ERR, "Tried to get url: "+url)
+        syslog.syslog(syslog.LOG_ERR, "Dataset response: "+response)
+        quit()
     if not "fileset" in url:
         snapurl = url+"/snapshot"
         response = rubrik.get(url=snapurl)
@@ -330,6 +339,29 @@ def clusterMenu(cluster, namefilter):
     #syslog.syslog(syslog.LOG_INFO, json.dumps(thelist))
     return thelist
 
+def addCluster():
+    relicindex = { 
+        'objectcount':0,
+        'snapcount':0,
+        'indexstatus': "Not Run",
+        'replicaspace': 0,
+        'relicspace': 0,
+        }
+    print()
+    newCluster = {      "id": "",
+      "sourceClusterUuid": "",
+      "sourceClusterName": "",
+      "sourceClusterAddress": "",
+      "isReplicationTargetPauseEnabled": False,
+      "isRemoteGlobalBlackoutActive": False
+    }
+    newCluster['sourceClusterName'] = input("Enter source Cluster friendsly name: ")
+    newCluster['sourceClusterUuid'] = input("Enter source Cluster UUID (must be exact): ")
+    newCluster['id'] = "DataLocation:::"+newCluster['sourceClusterUuid']
+    newCluster['relicindex'] = relicindex.copy()
+    relicdatabase['clusters'].append(newCluster.copy())
+    print("Added.")
+
 def showObjectDetails(obj):
     #print(obj)
     print("")
@@ -438,7 +470,7 @@ def slaReassignment(cisobject,slaId):
             time.sleep(3)
 
 def displayAvailableSLAs():
-    url = baseurl+"v1/sla_domain?primary_cluster_id=local"
+    url = baseurl+"v2/sla_domain?primary_cluster_id=local"
     response = rubrik.get(url=url)
     sladata = response.json()
     samesame = True
@@ -511,11 +543,11 @@ def deleteSelectedSnaps(uuid):
     allobjects = []
     confirm = input("Type YES to delete these snaps: ")
     if confirm == "YES":
+        selectlist = []
         for relic in relicdatabase['unmanagedObjects']:
             templated['id'] = relic['id']
             templated['name'] = relic['name']
             if "primary_cluster_id" in relic:
-                selectlist = []
                 selectlist.clear()
                 if uuid in relic['primary_cluster_id']:
                     for snap in relic['snapshots']['data']:
