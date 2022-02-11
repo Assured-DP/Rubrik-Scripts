@@ -4,7 +4,9 @@
 .DESCRIPTION
     Script performs a fileset Export of the specified folder and all subfolders.
 .EXAMPLE
-    PS C:\> .\Export-Files.ps1
+    PS C:\> .\Export-Files.ps1 
+    optionally declare variables:
+    PS C:\> .\Export-Files.ps1 -rubrik "10.1.1.1" -srcPath "G:\\MSSQL\\Daily"
  
 #>
 param(
@@ -18,6 +20,9 @@ param(
 Import-Module Rubrik -Force
 
 $rubrikCreds = Get-Credential
+
+# Or Pull from credential file:
+# $rubrikCreds = Import-CliXml -Path 'C:\My\Path\Cred.xml'
 
 Connect-Rubrik -Credential $rubrikCreds -Server $rubrik
 
