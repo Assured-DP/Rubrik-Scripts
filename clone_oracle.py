@@ -118,6 +118,7 @@ def getRecoveryPoint():
     responsejson = response.json()
     latest = responsejson['data'][len(responsejson['data'])-1]
     database['source']['snapid'] = latest['dbSnapshotSummaries'][len(latest['dbSnapshotSummaries'])-1]['id']
+    database['source']['snaptime'] = latest['dbSnapshotSummaries'][len(latest['dbSnapshotSummaries'])-1]['date']
     syslog.syslog(syslog.LOG_INFO, myMemory['sourceDB']+" latest recovery point: "+latest['endTime'])
     thisTime = datetime.datetime.strptime(latest['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
     if len(myMemory['lastTime'])>0:
@@ -133,13 +134,26 @@ def getRecoveryPoint():
         myMemory['lastTime'] = latest['endTime']
     recoverypoint = converttoms(myMemory['lastTime'])
     myMemory['snapId'] = database['source']['snapid']
+    myMemory['snaptime'] = database['source']['snaptime']
     return recoverypoint
 
 def runExport():
     url = "https://"+rubrikTarget+"/api/internal/oracle/db/"+database['source']['sourceDbId']+"/export"
+    mstime = converttoms(database['source']['snaptime'])+1000
+    """
+    ### This section sets the payload to use the snapshot for recovery
     payload = {
         "recoveryPoint": {
         "snapshotId": myMemory['snapId']
+            },
+        "targetOracleHostOrRacId": database['target']['hostId'],
+        "customPfilePath": myMemory['customPfile']
+        }
+    """
+    ### This section sets the payload to use the ms of the snapshot + 1000 ms 
+    payload = {
+        "recoveryPoint": {
+        "timestampMs": mstime
             },
         "targetOracleHostOrRacId": database['target']['hostId'],
         "customPfilePath": myMemory['customPfile']
