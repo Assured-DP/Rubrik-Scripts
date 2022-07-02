@@ -1,6 +1,3 @@
-## Clone Oracle DB from Rubrik to Target
-## Paramaters
-## rubrikclone.py <<SourceHost>> <<SourceDB>> <<TargetHost>> <<pfile>>
 ## sample:
 ## rubrikclone.py
 
@@ -42,6 +39,7 @@ def initMemory():
         return diskmemory
     else:
         syslog.syslog(syslog.LOG_INFO, "Establishing memory: "+str(memoryFile))
+        print("Establishing Memory: "+str(memoryFile))
         memory = {
             "sourceHost": "",
             "sourceDB": "",
@@ -62,23 +60,34 @@ def manageMemory(memory):
          return memory
 
 def getOracleHost(name):
+    name = name+".srpcompanies.com"
     url = "https://"+rubrikTarget+"/api/internal/oracle/host?name="+name
     response = rubriksession.get(url=url)
     responsejson = response.json()
     resultcount = len(responsejson['data'])
     if resultcount == 0:
         syslog.syslog(syslog.LOG_INFO, name+" resulted in 0 matches")
+        print(name+" resulted in 0 matches from Rubrik. This could be a typo or permissions issue.")
         sys.exit("No Host Match for "+name)
     if resultcount == 1:
         syslog.syslog(syslog.LOG_INFO, name+" resulted in 1 match: "+responsejson['data'][0]['name'])
+        print(name+" resulted in 1 match: "+responsejson['data'][0]['name'])
         result = responsejson['data'][0]
     if resultcount > 1:
         syslog.syslog(syslog.LOG_INFO, name+" resulted in "+str(resultcount)+" matches")
+        print(name+" resulted in "+str(resultcount)+" matches")
         matchlist = []
+        count = 0
         for match in responsejson['data']:
+            if match['name'] == name:
+                syslog.syslog(syslog.LOG_INFO, name+" exact matches to "+responsejson['data'][count])
+                print(name+" exact matches to: ")
+                print(json.dumps(responsejson['data'][count], indent=4))
+                return responsejson['data'][count]['id']
+            count += 1
             matchlist.append(match['name'])
         syslog.syslog(syslog.LOG_INFO, name+" matches: "+str(matchlist))
-        sys.exit("Too many matches for "+name)
+        sys.exit("No Exact Match for "+name)
     if result['status'] != "Connected":
         syslog.syslog(syslog.LOG_INFO, name+" currently disconnected. Check Rubrik Backup Service and retry")
         sys.exit(name+" currently disconnected from Rubrik. Exiting")
@@ -118,49 +127,47 @@ def getRecoveryPoint():
     responsejson = response.json()
     latest = responsejson['data'][len(responsejson['data'])-1]
     database['source']['snapid'] = latest['dbSnapshotSummaries'][len(latest['dbSnapshotSummaries'])-1]['id']
-    database['source']['snaptime'] = latest['dbSnapshotSummaries'][len(latest['dbSnapshotSummaries'])-1]['date']
     syslog.syslog(syslog.LOG_INFO, myMemory['sourceDB']+" latest recovery point: "+latest['endTime'])
+    print(myMemory['sourceDB']+" latest recovery point: "+latest['endTime'])
     thisTime = datetime.datetime.strptime(latest['endTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
     if len(myMemory['lastTime'])>0:
         syslog.syslog(syslog.LOG_INFO, "Previous Restore in Memory, setting to: "+str(myMemory['lastTime']))
+        print("Previous Restore in Memory, setting to: "+str(myMemory['lastTime']))
         lastTime = datetime.datetime.strptime(myMemory['lastTime'], "%Y-%m-%dT%H:%M:%S.%fZ")
     else:
         syslog.syslog(syslog.LOG_INFO, "No Previous Restore in Memory, setting to: "+latest['endTime'])
+        print("No Previous Restore in Memory, setting to: "+latest['endTime'])
         lastTime = thisTime
         myMemory['lastTime'] = latest['endTime']
     offset = thisTime - datetime.timedelta(hours=-24)
     syslog.syslog(syslog.LOG_INFO, "Offest detected as "+str(offset)+" hours")
+    print("Offest detected as "+str(offset)+" hours"))
     if lastTime > offset:
         myMemory['lastTime'] = latest['endTime']
     recoverypoint = converttoms(myMemory['lastTime'])
     myMemory['snapId'] = database['source']['snapid']
-    myMemory['snaptime'] = database['source']['snaptime']
+    database['source']['snaptime'] = latest['dbSnapshotSummaries'][len(latest['dbSnapshotSummaries'])-1]['date']
     return recoverypoint
 
 def runExport():
     url = "https://"+rubrikTarget+"/api/internal/oracle/db/"+database['source']['sourceDbId']+"/export"
-    mstime = converttoms(database['source']['snaptime'])+1000
-    """
-    ### This section sets the payload to use the snapshot for recovery
-    payload = {
-        "recoveryPoint": {
-        "snapshotId": myMemory['snapId']
-            },
-        "targetOracleHostOrRacId": database['target']['hostId'],
-        "customPfilePath": myMemory['customPfile']
-        }
-    """
-    ### This section sets the payload to use the ms of the snapshot + 1000 ms 
+    print("Snapshot date Time as ISO: "+database['source']['snaptime'])
+    mstime = converttoms(database['source']['snaptime'])+300000
     payload = {
         "recoveryPoint": {
         "timestampMs": mstime
             },
         "targetOracleHostOrRacId": database['target']['hostId'],
-        "customPfilePath": myMemory['customPfile']
+        "shouldRestoreFilesOnly": False, 
+        "customPfilePath": myMemory['customPfile'],
+        "advancedRecoveryConfigMap": {}
         }
     syslog.syslog(syslog.LOG_INFO, "Payload sent: "+str(payload))
+    print("Payload sent:")
+    print(json.dumps(payload, indent=4))
     response = rubriksession.post(url=url, json=payload)
     syslog.syslog(syslog.LOG_INFO, "Status Response: "+str(response.status_code))
+    print("Status Response: "+str(response.status_code))
     syslog.syslog(syslog.LOG_INFO, "Status Data: "+str(response.text))
     exporttask = response.json()
     #sample = "EXPORT_ORACLE_SNAPSHOT_b299f9be-da85-42c6-9e7f-93652ec678f9_de914856-88c4-4d20-9049-1a4cff17efb6:::0"
@@ -188,14 +195,16 @@ def monitorExport(exporttask):
 
 ## Main Body
 ## Global Variables
-user = "TempOracle"
-password = "<<PASSWORD>"
+user = ""
+password = ""
+token = ""
 
 memoryFile = "./.rubrikMemory.json"
 syslog.syslog(syslog.LOG_INFO, "Checking for history at path: "+str(memoryFile))
 
 if not (os.path.exists(sys.argv[4])):
     syslog.syslog(syslog.LOG_ERR, "Failure for custom pfile path, check proper path: "+sys.argv[4] )
+    print("pFile does not exist in the provided path")
     sys.exit(1)
 
 diskmemory = initMemory()
@@ -205,7 +214,8 @@ database = {
     "target" : {}
     }
 
-rubrikTarget = "TARGETIPORHOST"
+#rubrikTarget = "1.1.1.1"
+rubrikTarget = "targetname"
 
 #print(myMemory)
 #print(diskmemory)
@@ -236,8 +246,7 @@ database['source']['sourceDbId'] = getOracleDB(myMemory['sourceDB'])
 syslog.syslog(syslog.LOG_INFO, myMemory['sourceDB']+" identified as "+database['source']['sourceDbId'])
 
 ## Find Latest Snapshot Time
-if myMemory['snapId'] == "":
-    myMemory['recoveryPoint'] = getRecoveryPoint()
+myMemory['recoveryPoint'] = getRecoveryPoint()
 myMemory = manageMemory(myMemory)
 syslog.syslog(syslog.LOG_INFO, str(myMemory['recoveryPoint'])+" set as recovery point")
 
