@@ -141,7 +141,7 @@ def getRecoveryPoint():
         myMemory['lastTime'] = latest['endTime']
     offset = thisTime - datetime.timedelta(hours=-24)
     syslog.syslog(syslog.LOG_INFO, "Offest detected as "+str(offset)+" hours")
-    print("Offest detected as "+str(offset)+" hours"))
+    print("Offest detected as "+str(offset)+" hours")
     if lastTime > offset:
         myMemory['lastTime'] = latest['endTime']
     recoverypoint = converttoms(myMemory['lastTime'])
