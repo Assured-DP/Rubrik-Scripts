@@ -116,7 +116,7 @@ def getOracleDB(name):
 
 def converttoms(timestring):
     endTime = datetime.datetime.strptime(timestring, "%Y-%m-%dT%H:%M:%S.%fZ").strftime('%s.%f')
-    endTime = int(float(endTime)*1000)
+    endTime = int(float(endTime)*1000)-21600000 # 6 hours less than UTC = 21600000
     syslog.syslog(syslog.LOG_INFO, "Converted "+timestring+" to "+str(endTime))
     return endTime
 
@@ -152,7 +152,9 @@ def getRecoveryPoint():
 def runExport():
     url = "https://"+rubrikTarget+"/api/internal/oracle/db/"+database['source']['sourceDbId']+"/export"
     print("Snapshot date Time as ISO: "+database['source']['snaptime'])
-    mstime = converttoms(database['source']['snaptime'])+300000
+	print("Converted to: "+str(converttoms(database['source']['snaptime'])+300000))
+	pretimeadjust = converttoms(database['source']['snaptime'])
+    mstime = pretimeadjust+300000 # Adjustment for time shift from snapshot
     payload = {
         "recoveryPoint": {
         "timestampMs": mstime
