@@ -75,10 +75,15 @@ def getOracleHost(name):
     if resultcount > 1:
         syslog.syslog(syslog.LOG_INFO, name+" resulted in "+str(resultcount)+" matches")
         matchlist = []
+        count = 0
         for match in responsejson['data']:
+            if match['name'] == name:
+                syslog.syslog(syslog.LOG_INFO, name+" exact matches to "+responsejson['data'][count])
+                return responsejson['data'][count]['id']
+            count += 1
             matchlist.append(match['name'])
         syslog.syslog(syslog.LOG_INFO, name+" matches: "+str(matchlist))
-        sys.exit("Too many matches for "+name)
+        sys.exit("No Exact Match for "+name)
     if result['status'] != "Connected":
         syslog.syslog(syslog.LOG_INFO, name+" currently disconnected. Check Rubrik Backup Service and retry")
         sys.exit(name+" currently disconnected from Rubrik. Exiting")
