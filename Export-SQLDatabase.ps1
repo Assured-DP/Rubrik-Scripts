@@ -48,10 +48,10 @@ param(
 )
 Import-Module Rubrik -Force
 #region FUNCTIONS
-$Path = ".\Functions"
-Get-ChildItem -Path $Path -Filter *.ps1 | Where-Object { $_.FullName -ne $PSCommandPath } |ForEach-Object {
-    . $_.FullName
-}
+#$Path = ".\Functions"
+#Get-ChildItem -Path $Path -Filter *.ps1 | Where-Object { $_.FullName -ne $PSCommandPath } |ForEach-Object {
+#    . $_.FullName
+#}
 
 function Get-TargetFiles{
     param(

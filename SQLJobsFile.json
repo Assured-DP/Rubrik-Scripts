@@ -1,7 +1,7 @@
 {
     "RubrikCluster":  {
-                          "Server":  "10.51.23.240",
-                          "Token":  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZTFjMjllNC04OTQ1LTQzYjAtYTE0OC1iNzdmZTk0NzBiYzYiLCJpc3MiOiI1ZmViZmEzMi05NmY0LTRlNzItYjM1OC05NjkzMTg3NDAzMTMiLCJqdGkiOiI4MTc4NWM0Mi0zN2EwLTRjMDctOWZkMy0zN2IzMTQzOGU5OTkifQ.2jfMSogCA4kHtRPO6OTS2hyz1gzRCF913f84tbRdsy8"
+                          "Server":  "se-rubrik.cust02.local",
+                          "Token":  "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZTFjMjllNC04OTQ1LTQzYjAtYTE0OC1iNzdmZTk0NzBiYzYiLCJpc01mYVJlbWVtYmVyVG9rZW4iOmZhbHNlLCJpc3MiOiI1ZmViZmEzMi05NmY0LTRlNzItYjM1OC05NjkzMTg3NDAzMTMiLCJpYXQiOjE2ODY2ODY0MTMsImp0aSI6ImRjOGZiN2JlLTg5MjMtNGFlNC1iZDJhLWQ1YzYxNjQ0YjI4ZCJ9.-B2kp3_7cJs6BHbqJetmgJSBtCnG5bUCsjurJt0ZGWs"
                       },
     "Databases":  [
                       {
@@ -19,12 +19,12 @@
                                          "RecoveryPoint":  "latest",
                                          "Files":  [
                                                        {
-                                                           "logicalName":  "RecoverTestDataAE",
+                                                           "logicalName":  "TestData",
                                                            "exportPath":  "C:\\temp\\DATA\\",
                                                            "newFilename":  "RecoverTestDataAE.mdf"
                                                        },
                                                        {
-                                                           "logicalName":  "RecoverTestDataAE_Log",
+                                                           "logicalName":  "TestData_log",
                                                            "exportPath":  "C:\\temp\\LOG\\",
                                                            "newFilename":  "RecoverTestDataAE.ldf"
                                                        }
