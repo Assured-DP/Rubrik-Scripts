@@ -1,6 +1,6 @@
 {
     "RubrikCluster":  {
-                          "Server":  "10.51.23.240",
+                          "Server":  "se-rubrik.cust02.local",
                           "Token":  "<your-api-token>"
                       },
     "Databases":  [
@@ -19,12 +19,12 @@
                                          "RecoveryPoint":  "latest",
                                          "Files":  [
                                                        {
-                                                           "logicalName":  "RecoverTestDataAE",
+                                                           "logicalName":  "TestData",
                                                            "exportPath":  "C:\\temp\\DATA\\",
                                                            "newFilename":  "RecoverTestDataAE.mdf"
                                                        },
                                                        {
-                                                           "logicalName":  "RecoverTestDataAE_Log",
+                                                           "logicalName":  "TestData_log",
                                                            "exportPath":  "C:\\temp\\LOG\\",
                                                            "newFilename":  "RecoverTestDataAE.ldf"
                                                        }

@@ -6,7 +6,6 @@ $rubrikTarget = "se-rubrik.cust02.local"
 
 $token = "<your-api-token>"
 
-
 Connect-Rubrik -Server $rubrikTarget -Token $token
 
 Write-Host "Pre-SLA Creation"
