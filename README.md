@@ -76,3 +76,11 @@ Filename(s): | Export-Files.ps1
 Summary: | Exports File or a Folder from a fileset to another host of the same type
 Requires: | powershell 7.x and Rurik SDK for Powershell
 Notes: | The required parameters are listed in the beginning of the file. Any parameter not specified will pull the default parameter
+
+
+archive_tier_data_export.py | 
+------- | -------
+Filename(s): | archive_tier_data_export.py
+Summary: | Scrapes the event logs for all archive activites and records the upload and tiering sizes for all objects.
+Requires: | python3.6, requests, urllib
+Notes: | This process is single threaded and can take an exceptionally long time on a large cluster. There is error handling for objects with no snapshots or events that are continously running.
