@@ -97,7 +97,7 @@ def connectCluster(hostname, **credentials):
     header = {'Authorization': token}
     thesession.headers = header
     saveToken = credentials.get('saveToken', False)
-    if credentials['saveToken']:
+    if saveToken:
         tokenCreateResponse = thesession.post(url=url, json=apiTokenData)
         finalToken = tokenCreateResponse.json()['session']['token']
     else:
@@ -242,7 +242,7 @@ def getReplication(location, **kwargs):
                     url = url+"?"
                 url = url+key+"="+kwargs[key]
                 count+=1
-        print(url)
+        #print(url)
         response = globalsession.get(url=url)
         globalcache[apiEndpoint] = response.json()
         return response.json()
@@ -271,9 +271,34 @@ def getObject(text, **kwargs):
     if 'limit' in kwargs:
         body['limit'] = kwargs['limit']
     results = searchObject(body)
-    print(json.dumps(results, indent=4))
+    #print(json.dumps(results, indent=4))
         
+def getLivemount(objectType, **kwargs):
+    refreshCache = kwargs.get('refreshCache', False)
+    baseurl = "https://"+globalhostname+"/api/"
+    objId = kwargs.get('objId',"")
+    if objectType == "VirtualMachine":
+        url = baseurl+"v1/vmware/vm/snapshot/mount"
+    if objectType == "NutanixVirtualMachine":
+        url = baseurl+"v1/nutanix/vm/snapshot/mount"
+    if objectType == "HypervVirtualMachine":
+        url = baseurl+"internal/hyperv/vm/snapshot/mount"
+    if objectType == "WindowsVolumeGroup":
+        url = baseurl+"v1/volume_group/snapshot/mount"
+    if objectType == "MssqlDatabase":
+        url = baseurl+"v1/mssql/db/mount"
+    if objectType == "ManagedVolume":
+        url = baseurl+"internal/managed_volume/snapshot/export"
+    if len(objId) > 1:
+        url = url + "/"+objId
+    apiEndpoint = url
+    if (apiEndpoint in globalcache) and (not refreshCache):
+        return globalcache[apiEndpoint]
+    else:
+        response = globalsession.get(url=url)
+        data = response.json()
+        cache(apiEndpoint, data)
+        return data
     
-        
     
 
