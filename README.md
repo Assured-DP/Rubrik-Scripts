@@ -84,3 +84,11 @@ Filename(s): | archive_tier_data_export.py
 Summary: | Scrapes the event logs for all archive activites and records the upload and tiering sizes for all objects.
 Requires: | python3.6, requests, urllib
 Notes: | This process is single threaded and can take an exceptionally long time on a large cluster. There is error handling for objects with no snapshots or events that are continously running.
+
+
+simplegetLiveMounts.py | 
+------- | -------
+Filename(s): | simplegetLiveMounts.py
+Summary: | Pulls all livemounts and then lists which nodes are attached to live mounts. Useful for determining which nodes are unsafe to reboot during a recovery.
+Requires: | python3.6, requests, urllib, rubrikSDK.py
+Notes: | This is single threaded, pulls each type, and then compares against node IPs to determine linkage. Some objects are not able to be linked, such as AHV and HyperV
