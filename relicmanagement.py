@@ -13,6 +13,7 @@ import os
 import threading
 import syslog
 import time
+import rubrikSDK
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
@@ -27,7 +28,8 @@ def recordAnswer(userinput, answerreference):
         return userinput
 
 def manageAnswerFile(answerfile):
-    answerpath = './.runbookntanswerfile.json'
+    homepath = str(os.path.expanduser('~')) 
+    answerpath = homepath+'/.runbookntanswerfile.json'
     if os.path.exists(answerpath):
         loadedanswers = json.load(open(answerpath))
         if loadedanswers == answerfile:
@@ -52,10 +54,10 @@ def connectRubrik(dripaddress,username,password):
     #tempsess.auth = (username, password)
     drsessurl = baseurl + "v1/session"
     #print "Generating Token"
-    drtokenresponse = requests.request('POST', url=drsessurl, auth=(username,password), verify=False)
+    #drtokenresponse = requests.request('POST', url=drsessurl, auth=(username,password), verify=False)
     #print "Token Reponse: "+str(drtokenresponse)
-    drtokenjson = drtokenresponse.json()
-    drtoken = drtokenjson['token']
+    #drtokenjson = drtokenresponse.json()
+    drtoken = rubrikSDK.connectCluster(dripaddress, password=password, username=username)
     drbearer = "Bearer " + drtoken
     drheader = {'Authorization': drbearer}
     #print "Header Assembled: "+str(drheader)
@@ -703,7 +705,8 @@ relicdatabase = {
     }
 
 # Setup Answer File
-answerpath = './.runbookntanswerfile.json'
+homepath = str(os.path.expanduser('~'))
+answerpath = homepath+'/.runbookntanswerfile.json'
 answerjson = { 
     "rubrikip": "a", 
     "rubrikuser": "b"
