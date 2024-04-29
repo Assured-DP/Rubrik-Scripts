@@ -13,6 +13,13 @@ Requires: | requests, urllib3, time
 Notes: | Allows for comma-separated list or oracle node source IPs. Each rubrik node is considered an NFS server and the floating IP is the path. Script will consolidate managed volume exports to a single rubrik node entry in the script.
 
 
+Export-SQLDatabase.ps1 | Export all databases in a file
+------- | -------
+Filename: | Export-SQLDatabase.ps1
+Summary: | Exports all of the SQL Databases listed in the SQLJobsFile.json file and uses the targets and files instructed in that file
+Requires: | Powershell 5.0 or newer and Rubrik CDM SDK
+Notes: | Assumes that the full path for the JSON file is available and that an API token is being leveraged.
+
 
 filerecovery.py | Single File Recovery Tool
 ------- | -------
