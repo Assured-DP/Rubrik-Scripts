@@ -272,6 +272,18 @@ def getObject(text, **kwargs):
         body['limit'] = kwargs['limit']
     results = searchObject(body)
     #print(json.dumps(results, indent=4))
+
+def getVm(vmId, **kwargs):
+    baseurl = "https://"+globalhostname+"/api/"
+    apiEndpoint = "v1/vmware/vm/"+vmId
+    url = baseurl+apiEndpoint
+    refreshCache = kwargs.get('refreshCache', False)
+    if (apiEndpoint in globalcache) and (not refreshCache):
+        return globalcache[apiEndpoint]
+    else:
+        response = globalsession.get(url=url)
+        data = response.json()
+        return data
         
 def getLivemount(objectType, **kwargs):
     refreshCache = kwargs.get('refreshCache', False)
