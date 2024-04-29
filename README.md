@@ -21,6 +21,13 @@ Requires: | Powershell 5.0 or newer and Rubrik CDM SDK
 Notes: | Assumes that the full path for the JSON file is available and that an API token is being leveraged.
 
 
+LM-SQLDatabase.ps1 | Export all databases in a file
+------- | -------
+Filename: | LM-SQLDatabase.ps1
+Summary: | livemounts all of the SQL Databases listed in the SQLJobsFile.json file and uses the target specfied. Does not require the file names in the file.
+Requires: | Powershell 5.0 or newer and Rubrik CDM SDK
+Notes: | Assumes that the full path for the JSON file is available and that an API token is being leveraged.
+
 filerecovery.py | Single File Recovery Tool
 ------- | -------
 Filename: | filerecovery.py
