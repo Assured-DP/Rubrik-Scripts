@@ -35,10 +35,13 @@ for each in objectTypes:
         allLiveMounts.append(obj) # Append the basic and detailed LM info to the Established List to merge all types
 
 # Iterate through the full list of all livemounts of all types
+print("Building reference information...")
 for each in allLiveMounts:
     if each['objType'] == "VirtualMachine": # get node references for vmware types
         for node in nodes['data']:
             if each['detail']['nasIp'] == node['ipAddress']:
+                vmdata = rubrikSDK.getVm(each['vmId'])
+                each['name'] = vmdata['name']
                 node['mounts'].append(each) # Append the LM data to the node entry to make counting easier
     if each['objType'] == "WindowsVolumeGroup": # Volume Groups...
         for node in nodes['data']:
@@ -47,6 +50,7 @@ for each in allLiveMounts:
                 node['mounts'].append(each) # Append the LM data to the node entry to make counting easier
     if each['objType'] == "MssqlDatabase": # SQL Databases
         for node in nodes['data']:
+            each['name'] = node['sourceDatabaseName']
             ipAddress = each['detail']['links']['sourceDatabase']['href'].split('/')[2]
             if ipAddress == node['ipAddress']:
                 node['mounts'].append(each) # Append the LM data to the node entry to make counting easier
@@ -57,5 +61,10 @@ knownCount = 0
 for node in nodes['data']:
     knownCount = knownCount + len(node['mounts'])
     print(node['hostname']+" has "+str(len(node['mounts']))+" Live Mounts")
+    for mount in node['mounts']:
+        try:
+            print("    "+mount['name'])
+        except:
+            continue
 
 print(str(knownCount)+" accounted for out of "+str(len(allLiveMounts))+" total Live Mounts")
