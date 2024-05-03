@@ -143,7 +143,7 @@ foreach ($Database in $JobFile.Databases) {
 
     $job = New-Object PSObject
     $job | Add-Member -type NoteProperty -name id -Value $RubrikRequest.id
-    $job | Add-Member -type NoteProperty -name JobValues -Value $ExportRubrikDatabase
+    $job | Add-Member -type NoteProperty -name JobValues -Value $LiveMountDatabasePayload
     $job | Add-Member -type NoteProperty -name TargetServerInstance -Value $Database.Target.ServerInstance
     $JobsToMonitor += $job
 }
