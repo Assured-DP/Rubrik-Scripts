@@ -131,7 +131,7 @@ foreach ($Database in $JobFile.Databases) {
 	    	date = $RecoveryDateTime
 			}
     	mountedDatabaseName = $Database.Target.DatabaseName
-		TargetInstanceId = $Database.Target.instanceId
+		targetInstanceId = $Database.Target.instanceId
 	}
 
  
