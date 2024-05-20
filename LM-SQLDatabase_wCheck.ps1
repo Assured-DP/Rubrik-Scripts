@@ -133,9 +133,9 @@ foreach ($Database in $JobFile.Databases) {
 	$lmResponse = Invoke-RubrikRESTCall -api '1' -Endpoint "mssql/db/mount" -Method GET
 	
 	foreach ($db in $lmResponse.data){
-		$Endpoint = "mssql/db/mount/$($db.id)"
+		$Endpoint = "mssql/db/mount/$($db.id)?force=true"
 		$remove = Invoke-RubrikRESTCall -api '1' -Endpoint $Endpoint -Method "DELETE"
-		Start-Sleep -Seconds 3
+		Start-Sleep -Seconds 4
 		#$RubrikRequestInfo = Get-RubrikRequest -id $remove.id -Type mssql -WaitForCompletion
 	}
 
