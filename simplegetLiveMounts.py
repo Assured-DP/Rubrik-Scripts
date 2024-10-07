@@ -1,3 +1,4 @@
+#!/bin/python3
 # Simple Version of getting live mount servers
 
 import rubrikSDK # Importing andrew's Rubrik SDK
@@ -39,10 +40,22 @@ print("Building reference information...")
 for each in allLiveMounts:
     if each['objType'] == "VirtualMachine": # get node references for vmware types
         for node in nodes['data']:
-            if each['detail']['nasIp'] == node['ipAddress']:
-                vmdata = rubrikSDK.getVm(each['vmId'])
-                each['name'] = vmdata['name']
-                node['mounts'].append(each) # Append the LM data to the node entry to make counting easier
+            try:
+                if each['detail']['nasIp'] == node['ipAddress']:
+                    vmdata = rubrikSDK.getVm(each['vmId'])
+                    each['name'] = vmdata['name']
+                    node['mounts'].append(each) # Append the LM data to the node entry to make counting easier
+            except:
+                print("Failed to append detail")
+                print(json.dumps(each['detail'], indent=4))
+                try:
+                    each['detail'] = rubrikSDK.getLivemount("VirtualMachine", objId=each['detail']['vmId'])
+                    vmdata = rubrikSDK.getVm(each['vmId'])
+                    each['name'] = vmdata['name']
+                    node['mounts'].append(each)
+                    print("retry attempt to populate succeeded and data appended")
+                except:
+                    print("retry attempt to populate failed")
     if each['objType'] == "WindowsVolumeGroup": # Volume Groups...
         for node in nodes['data']:
             ipAddress = each['detail']['mountedVolumes'][0]['smbPath'].split('\\')[2]
