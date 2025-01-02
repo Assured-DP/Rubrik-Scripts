@@ -65,6 +65,7 @@ def connectRubrik(dripaddress,username,password):
     testurl = baseurl + "v1/cluster/me"
     drtestconnect = drrbksess.get(url=testurl)
     drtestresponse = drtestconnect.status_code
+    print(drtestconnect.text)
     drtestjson = drtestconnect.json()
     localprimaryclusterid = drtestjson['id']
     #print "Token Auth Test: "+str(drtestresponse)
