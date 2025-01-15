@@ -145,6 +145,13 @@ glob_rubrik_session = rubrikSDK.getSession(glob_rubrikip, glob_user, glob_pass, 
 
 outputfile = './'+glob_rubrikip+'replica_data.csv'
 
+glob_EventTarget = 2000
+eventCount = input("Enter total events to grab (2000 is default): ")
+if eventCount == "":
+    glob_EventTarget = 2000
+else:
+    glob_EventTarget = int(eventCount)
+
 glob_sourceCluster = input("Enter source cluster name: ")
 replication = rubrikSDK.getReplication("source", name=glob_sourceCluster)
 
@@ -183,13 +190,14 @@ events = response.json()
 allevents = []
 keepGoing = True
 count = 1
+loaded = 0
 while keepGoing:
     print("Pulling another 100...")
     for event in events['data']:
         if (event['latestEvent']['eventName'] == "Replication.ReplicationSucceeded") and (event['latestEvent']['objectId'] in glob_objlist['uuidlist']):
             allevents.append(event)
     print("Length of Events: "+str(len(events['data'])))
-    print("Current Count: "+str(count))
+    print("Current Found Events: "+str(count)+" of "+str(loaded)+" events loaded")
     if (len(events['data']) == 100):
         keepGoing = True
         url = "https://"+glob_rubrikip+"/api/v1/event/latest?limit=100&event_series_status=Success&event_status=Success&event_type=Replication&after_id="+events['data'][99]['afterId']+"&should_include_event_series=false"
@@ -202,8 +210,9 @@ while keepGoing:
             print("Last Event: "+events['data'][99]['latestEvent']['id'])
         except:
             keepGoing = False
-        count = count + 1
-        if count > 20000:
+        count = len(allevents)
+        loaded = loaded+100
+        if count > glob_EventTarget:
             keepGoing = False
     else:
         keepGoing = False
