@@ -46,6 +46,7 @@ def sessionCreate(hostname, token):
 
 def connectCluster(hostname, **credentials):
     global globalhostname
+    global globalsession
     # Pass in the hostname, FQDN, or IP address without any prefix or suffic
     # Also expecting "username" and "password" variables. If a TOTP variable is passed in then we will attempt to use it.
     thesession = requests.Session()
@@ -66,6 +67,7 @@ def connectCluster(hostname, **credentials):
     else:
         code = input("Enter TOTP Code: ")
     response = thesession.post(url=url, auth=(username, password), json=payload)
+    print(response.text)
     attemptId = response.json()['mfaResponse']['attemptId']
     data = {
         "initParams":{}, 
@@ -90,11 +92,15 @@ def connectCluster(hostname, **credentials):
             }
         }
     try:
-        token = "Bearer "+challengeResponse.json()['session']['token']
+        if 'csrfToken' in challengeResponse.json()['session']:
+            token = challengeResponse.json()['session']['csrfToken']
+            header = {'x-rubrik-csrf-token': token}
+        else:
+            token = "Bearer "+challengeResponse.json()['session']['token']
+            header = {'Authorization': token}
     except:
         print("TOTP Authentication Failure, session not created")
         return 
-    header = {'Authorization': token}
     thesession.headers = header
     saveToken = credentials.get('saveToken', False)
     if saveToken:
@@ -103,17 +109,18 @@ def connectCluster(hostname, **credentials):
     else:
         finalToken = challengeResponse.json()['session']['token']
     globalhostname = hostname
-    return finalToken
+    globalsession = thesession
+    return thesession, finalToken
 
 def getSession(hostname, username, password, totp):
-    token = connectCluster(hostname, username=username, password=password, totp=totp, saveToken=False)
-    if token is None:
-        print("Unable to authenticate")
-        raise ExceptionGroup('Unable to Connect to Rubrik')
-    session = sessionCreate(hostname, token)
-    if session is None:
-        print("Unable to create session")
-        raise ExceptionGroup('Unable to create session')
+    session, finalToken = connectCluster(hostname, username=username, password=password, totp=totp, saveToken=False)
+    #if token is None:
+    #    print("Unable to authenticate")
+    #    raise ExceptionGroup('Unable to Connect to Rubrik')
+    #session = sessionCreate(hostname, token)
+    #if session is None:
+    #    print("Unable to create session")
+    #    raise ExceptionGroup('Unable to create session')
     return session
 
 def cache(key, value):
@@ -311,6 +318,20 @@ def getLivemount(objectType, **kwargs):
         data = response.json()
         cache(apiEndpoint, data)
         return data
-    
-    
 
+def getArchiveId(archiveName):
+    url = "https://"+globalhostname+"/api/internal/archive/location?name="+archiveName
+    response = globalsession.get(url)
+    archId = response.json()['data'][0]['id']
+    return archId
+   
+def migrateWorkload(snappableID, data):
+    url = "https://"+globalhostname+"/api/internal/archive/migrate/data_source/"+snappableID
+    response = globalsession.post(url,data=data)
+    return response
+    
+def getMssqlSnappableId(mssqlDb):
+    url = "https://"+globalhostname+"/api/v1/mssql/db/"+mssqlDb+"/snappable_id"
+    response = globalsession.get(url)
+    sqlsnapid = response.json()['snappableId']
+    return sqlsnapid

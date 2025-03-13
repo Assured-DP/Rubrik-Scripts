@@ -13,6 +13,7 @@ import os
 import threading
 import syslog
 import time
+import rubrikSDK
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
@@ -27,7 +28,8 @@ def recordAnswer(userinput, answerreference):
         return userinput
 
 def manageAnswerFile(answerfile):
-    answerpath = './.runbookntanswerfile.json'
+    homepath = str(os.path.expanduser('~')) 
+    answerpath = homepath+'/.runbookntanswerfile.json'
     if os.path.exists(answerpath):
         loadedanswers = json.load(open(answerpath))
         if loadedanswers == answerfile:
@@ -52,21 +54,22 @@ def connectRubrik(dripaddress,username,password):
     #tempsess.auth = (username, password)
     drsessurl = baseurl + "v1/session"
     #print "Generating Token"
-    drtokenresponse = requests.request('POST', url=drsessurl, auth=(username,password), verify=False)
+    #drtokenresponse = requests.request('POST', url=drsessurl, auth=(username,password), verify=False)
     #print "Token Reponse: "+str(drtokenresponse)
-    drtokenjson = drtokenresponse.json()
-    drtoken = drtokenjson['token']
-    drbearer = "Bearer " + drtoken
-    drheader = {'Authorization': drbearer}
+    #drtokenjson = drtokenresponse.json()
+    drrbksess, drtoken = rubrikSDK.connectCluster(dripaddress, password=password, username=username)
+    #drbearer = "Bearer " + drtoken
+    #drheader = {'Authorization': drbearer}
     #print "Header Assembled: "+str(drheader)
-    drrbksess.headers = drheader
+    #drrbksess.headers = drheader
     testurl = baseurl + "v1/cluster/me"
     drtestconnect = drrbksess.get(url=testurl)
     drtestresponse = drtestconnect.status_code
+    print(drtestconnect.text)
     drtestjson = drtestconnect.json()
     localprimaryclusterid = drtestjson['id']
     #print "Token Auth Test: "+str(drtestresponse)
-    return drrbksess, drbearer;
+    return drrbksess
 
 def grabReplicaClusters():
     url = baseurl+"internal/replication/source"
@@ -507,11 +510,11 @@ def updateSla(uuid):
         return
     confirm = input("Type YES to reassign these snaps to "+newSla['name']+": ")
     if confirm == "YES":
-        selectlist = []
         for relic in relicdatabase['unmanagedObjects']:
             templated['id'] = relic['id']
             templated['name'] = relic['name']
             if "primary_cluster_id" in relic:
+                selectlist = []
                 selectlist.clear()
                 if uuid in relic['primary_cluster_id']:
                     for snap in relic['snapshots']['data']:
@@ -703,7 +706,8 @@ relicdatabase = {
     }
 
 # Setup Answer File
-answerpath = './.runbookntanswerfile.json'
+homepath = str(os.path.expanduser('~'))
+answerpath = homepath+'/.runbookntanswerfile.json'
 answerjson = { 
     "rubrikip": "a", 
     "rubrikuser": "b"
@@ -736,7 +740,7 @@ print(" ")
 
 # Connect to DR Rubrik
 print("Connecting to Rubrik at "+baseurl)
-rubrik, globaltoken = connectRubrik(clusterip,username,password)
+rubrik = connectRubrik(clusterip,username,password)
 response = rubrik.get(url=urlclusterid)
 if response.status_code == 200:
     clusterjson = response.json()
