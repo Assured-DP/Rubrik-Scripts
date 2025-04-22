@@ -196,7 +196,7 @@ Import-Module Rubrik -Force
 Import-Module SQLServer
 Import-Module FailoverClusters
 
-Connect-Rubrik -Server $RubrikServer -Token $Credentials.APIToken.amer1
+Connect-Rubrik -Server $RubrikServer -Token $Token
 # $RubrikConnectionInfo = [pscustomobject]@{
 #     Server = $global:rubrikConnection.server
 #     Token =  $global:rubrikConnection.token
