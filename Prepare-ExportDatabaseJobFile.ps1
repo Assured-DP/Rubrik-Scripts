@@ -6,6 +6,7 @@
 .EXAMPLE
     PS C:\> .\Prepare-ExportDatabaseJobFile.ps1 -RubrikServer amer1-rbk01 `
     -SourceServerInstance SQL1 `
+    -Token token `
     -Databases AdventureWorks2016 `
     -RecoveryPoint latest `
     -TargetServerInstance SQL2
@@ -25,6 +26,8 @@
     Source SQL Server
 .PARAMETER AvailabilityGroupName
     Source Availability Group Name
+.PARAMETER Token
+    Rubrik CDM API Token
 .PARAMETER Databases
     Provide a comma separated list of databases found on the source SQL Server and Instance
 .PARAMETER RecoveryPoint
