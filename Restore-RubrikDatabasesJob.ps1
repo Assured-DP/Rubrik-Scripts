@@ -4,7 +4,7 @@
 .DESCRIPTION
     Script will perform a Rubrik Restore of a database or list of databases
 .EXAMPLE
-    PS C:\> .\Restore-RubrikDatabasesJob.ps1 -RubrikServer 172.1.1.1 -SourceSQLHost sql1 -Database AdventureWorks2016 -RecoveryPoint Latest
+    PS C:\> .\Restore-RubrikDatabasesJob.ps1 -RubrikServer 172.1.1.1 -SourceSQLHost sql1 -Database AdventureWorks2016 -RecoveryPoint Latest -Token token
     Will restore the latest backup of AdventureWorks2016 from the SQL1 server instance to the SQL2 server instance
 .PARAMETER RubrikServer
     Rubrik Server should be the IP Address or your Rubrik Server Name. This will be the same value you use to access the Rubrik UI
@@ -28,6 +28,8 @@
                             UTC time (respectively) at the point in time specified within the last 24 hours
         Format:             Any valid <value> that PS Get-Date supports in: "Get-Date -Date <Value>"
                             Example: "2018-08-01T02:00:00.000Z" restores back to 2AM on August 1, 2018 UTC.
+.PARAMETER Token
+    Rubrik CDM API Token
 .NOTES
     Name:       Restore databases via Rubrik
     Created:    9/19/2019
@@ -61,8 +63,11 @@ param(
     [Parameter(Position=3)]
     [String[]]$Databases,
     [Parameter(Position=4)]
-    [string]$RecoveryPoint
+    [string]$RecoveryPoint,
+    [Parameter(Position=5)]
+    [string]$Token
 )
+<#
 Add-Type -AssemblyName PresentationCore,PresentationFramework
 $MessageBoxText  = '
 This script should only be run by a DBA. 
@@ -89,7 +94,7 @@ $MessageBoxResult = [System.Windows.MessageBoxResult]::No
 $Result = [System.Windows.MessageBox]::Show($MessageBoxText, $MessageBoxCaption, $MessageBoxButton, $MessageBoxImage, $MessageBoxResult)
 
 if ($Result -eq 'No'){break}
-
+#>
 $DatabasesToBeRestored = @()
 [string[]]$SystemDatabases = "master", "model", "msdb", "distribution", "SSISDB"
 if ($Databases | Where-Object {$SystemDatabases -contains $_}){
