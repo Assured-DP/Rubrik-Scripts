@@ -25,7 +25,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def take_on_demand_snapshots(cluster_name, api_token, vm_names_csv):
-    rubrik = rubrik_cdm.Connect(node_ip="10.3.40.15", api_token=api_token)
+    rubrik = rubrik_cdm.Connect(node_ip=cluster_name, api_token=api_token)
 
     vm_names = [name.strip() for name in vm_names_csv.split(',')]
 
